@@ -1,5 +1,9 @@
 package com.epam.mjc;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringTokenizer;
+
 public class MethodParser {
 
     /**
@@ -20,6 +24,53 @@ public class MethodParser {
      * @return {@link MethodSignature} object filled with parsed values from source string
      */
     public MethodSignature parseFunction(String signatureString) {
-        throw new UnsupportedOperationException("You should implement this method.");
+        StringTokenizer tokenizer = new StringTokenizer(signatureString, "(");
+        StringTokenizer tokenizerStart = new StringTokenizer(tokenizer.nextToken().trim(), " ");
+
+        String accessModifier = null;
+        String returnType = "";
+        String methodName = "";
+
+        if (tokenizerStart.countTokens() == 3) {
+            accessModifier = tokenizerStart.nextToken();
+            returnType = tokenizerStart.nextToken();
+            methodName = tokenizerStart.nextToken();
+        } else if (tokenizerStart.countTokens() == 2) {
+            returnType = tokenizerStart.nextToken();
+            methodName = tokenizerStart.nextToken();
+        } else if (tokenizerStart.countTokens() == 1) {
+            methodName = tokenizerStart.nextToken();
+        }
+
+        String argumentsString = tokenizer.nextToken().trim();
+        if (argumentsString.endsWith(")")) {
+            argumentsString = argumentsString.substring(0, argumentsString.length() - 1);  // Remove closing parenthesis
+        }
+
+        StringTokenizer tokenizerEnd = new StringTokenizer(argumentsString, ",");
+
+        List<MethodSignature.Argument> arguments = new ArrayList<>();
+
+        while (tokenizerEnd.hasMoreTokens()) {
+            String token = tokenizerEnd.nextToken().trim();
+            StringTokenizer tempToken = new StringTokenizer(token, " ");
+
+            if (tempToken.countTokens() == 2) {
+                String type = tempToken.nextToken();
+                String name = tempToken.nextToken();
+                arguments.add(new MethodSignature.Argument(type, name));
+            }
+        }
+
+        if (argumentsString.isEmpty()) {
+            arguments = new ArrayList<>();
+        }
+
+        MethodSignature methodSignature = new MethodSignature(methodName, arguments);
+        methodSignature.setReturnType(returnType);
+        methodSignature.setMethodName(methodName);
+        methodSignature.setAccessModifier(accessModifier);
+
+        return methodSignature;
     }
 }
